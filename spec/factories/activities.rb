@@ -14,7 +14,7 @@ MockUser.blueprint do
 	id { "100#{sn}" }
 	display_name { "JohnDoe" }
 	picture_url { "http:://localhost:5000/pictures/users/johndoe.png"}
-	friends {[]}
+	friends {['10002', '10003', '10004']}
 end
 
 MockGame.blueprint do

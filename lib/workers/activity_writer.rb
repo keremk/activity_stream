@@ -29,7 +29,7 @@ class ActivityWriter
 		# Save to user activity stream
 		actor = @activity[:actor.to_s]
 		puts "#{actor}"
-		actor_id = actor[:actorId.to_s] if actor.nil?
+		actor_id = actor[:actorId.to_s] unless actor.nil?
 		puts "Actor = #{actor_id}"
 		save_to_activity_stream "timeline:#{actor_id}" 
 	end

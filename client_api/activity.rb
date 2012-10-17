@@ -25,7 +25,7 @@ class Activity
 
 	def initialize(hash)
 		@activity_code = hash[:activity_code] 
-		raise ArgumentError.new("Not valid activity code") if @activity_code.nil? && (@activity_code.to_i < 0 && @activity_code.to_i > 2)
+		raise ArgumentError.new('Not valid activity code') if @activity_code.nil? && (@activity_code.to_i < 0 && @activity_code.to_i > 2)
 		to_standard_activity hash
 	end
 
@@ -53,18 +53,18 @@ private
 
 	def actor_definition(hash)
 		user = hash[:user]
-		raise ArgumentError.new("User is required for activity") if user.nil?
-		raise ArgumentError.new("User needs an id") if user.id.nil?
+		raise ArgumentError.new('User is required for activity') if user.nil?
+		raise ArgumentError.new('User needs an id') if user.id.nil?
 
 		@friends = user.friends || []
 
 		actor = {}
 		actor[:actorId] = user.id
-		actor[:displayName] = user.display_name || "Unknown"
-		image_url = user.picture_url || ""
+		actor[:displayName] = user.display_name || 'Unknown'
+		image_url = user.picture_url || ''
 		actor[:image] = { :url => image_url }
-		actor[:objectType] = "person"
-		actor[:url] = ""
+		actor[:objectType] = 'person'
+		actor[:url] = ''
 		actor
 	end
 
@@ -72,14 +72,14 @@ private
 		game = hash[:game]
 
 		target = {}
-		target[:objectType] = "game"
+		target[:objectType] = 'game'
 		return target if game.nil?
 
-		target[:id] = game.id || ""
-		target[:displayName] = game.name || ""
-		image_url = game.image || ""
+		target[:id] = game.id || ''
+		target[:displayName] = game.name || ''
+		image_url = game.image || ''
 		target[:image] = { :url => image_url }
-		target[:url] = ""
+		target[:url] = ''
 		target
 	end
 
@@ -90,7 +90,7 @@ private
 		return object if activity_description.nil?
 
 		object[:content] = activity_description.content
-		image_url = activity_description.image || ""
+		image_url = activity_description.image || ''
 		object[:image] = { :url => image_url }
 		object
 	end

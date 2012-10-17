@@ -17,8 +17,13 @@ class ActivityAPI < Sinatra::Base
 		enable :logging
 	end
 
+	before do
+		# Add this so that, I can use logger in other called modules
+		Dependo::Registry[:log] = logger
+	end
+
 	get '/' do
-		"hello world"
+		[200, "Hello World"]
 	end
 
 	post '/v1/users/:user_id/activity' do 
@@ -43,6 +48,9 @@ class ActivityAPI < Sinatra::Base
 			logger.info "Error: #{request.body.read}"
 			logger.info "Error: #{e.message}, Backtrace: #{e.backtrace}"
 			[400, "Malformed JSON post"]
+		rescue StandardError => e
+			logger.info "Error: #{e.message}, Backtrace: #{e.backtrace}"
+			[400, e.message]
 		end
 	end
 
@@ -58,10 +66,14 @@ class ActivityAPI < Sinatra::Base
 			stop = params[:stop] || 100
 			user_id = params[:user_id] || 0
 
-			presenter = ActivityPresenter.new logger
+			presenter = ActivityPresenter.new 
 			activities = presenter.present :start => start, :stop => stop, :type => stream_type, :user_id => user_id		
 			logger.info "#{activities}"
-			[200, activities]
+
+			[200, activities.to_json]
+		rescue StandardError => e
+			logger.info "Error: #{e.message}, Backtrace: #{e.backtrace}"
+			[400, e.message]
 		end
 	end
 
