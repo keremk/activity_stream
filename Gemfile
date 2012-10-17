@@ -12,10 +12,14 @@ gem "activesupport"
 gem "resque", "~> 1.22.0"
 gem "sinatra-redis"
 
+# Temporarily here move to the main project later
+gem "httparty"
+
 group :development, :test do
 	gem "pry"
 	gem "debugger"
 	gem "rerun"
+	gem "machinist", ">= 2.0.0.beta2"
 	gem "rb-fsevent", "~> 0.9.1"
 end
 

@@ -5,19 +5,16 @@ Bundler.require(:default)
 require 'sinatra/base'
 require 'sinatra/redis'
 
-require 'models/activity'
 require 'presenters/activity_presenter'
 require 'workers/activity_writer'
 
 class ActivityAPI < Sinatra::Base
 	include Dependo::Mixin	
+
+	ACTIVITY_WHITELIST = [:published, :actor, :verb, :summary, :object, :target]
+
 	configure do
 		enable :logging
-		
-		# uri = URI.parse('redis://localhost:6379')
-		# Resque.redis = Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
-		# Resque.redis.namespace = "resque:incoming"
-		# set :redis, ENV["REDISTOGO_URL"]
 	end
 
 	get '/' do
@@ -26,20 +23,29 @@ class ActivityAPI < Sinatra::Base
 
 	post '/v1/users/:user_id/activity' do 
 		begin
-			incoming_message = request.body.read.to_s
-			logger.info("#{incoming_message}")
-			activity = Activity.new
-			activity.from_json(incoming_message)
-			friends = incoming_message[:friends.to_s] || [] 
+			incoming_message = JSON.parse(request.body.read.to_s)
+			logger.info "#{incoming_message}"
+
+			activity = {}
+			ACTIVITY_WHITELIST.each do |key|
+				activity[key.to_s] = incoming_message[key.to_s]
+			end
+			logger.info "#{activity}"
+
+			friends = incoming_message[:friends.to_s] || []
+			logger.info "#{friends}" 
+			
 			Resque.enqueue(ActivityWriter, activity, friends)
 			logger.info "Item queued up"
-			[200, ""]
+			
+			[200, "Successfully posted to queue"]
 		rescue JSON::ParserError => e
+			logger.info "Error: #{request.body.read}"
 			logger.info "Error: #{e.message}, Backtrace: #{e.backtrace}"
+			[400, "Malformed JSON post"]
 		end
 	end
 
-	#Polk94109$
 	# user_id = 0 is global
 	# :stream_type is news or timeline
 	get '/v1/users/:user_id/:stream_type' do
@@ -53,9 +59,9 @@ class ActivityAPI < Sinatra::Base
 			user_id = params[:user_id] || 0
 
 			presenter = ActivityPresenter.new logger
-			newsfeed = presenter.present :start => start, :stop => stop, :type => stream_type, :user_id => user_id		
-			logger.info "#{newsfeed}"
-			[200, newsfeed]
+			activities = presenter.present :start => start, :stop => stop, :type => stream_type, :user_id => user_id		
+			logger.info "#{activities}"
+			[200, activities]
 		end
 	end
 

@@ -4,11 +4,8 @@ require 'rspec'
 require 'rack/test'
 
 describe Activity, 'ActivityWriter test' do 
-	@load_path = File.expand_path(File.dirname(__FILE__) + '/../factories/')
-	it "creates correct Activity from JSON" do
-		json = IO.read(@load_path + "test.json")
-		activity = Activity.new
-
+	# @load_path = File.expand_path(File.dirname(__FILE__) + '/../factories/')
+	it "creates correct Activity from JSON" do		
 	end
 
 	it "serializes to correct JSON from Activity" do

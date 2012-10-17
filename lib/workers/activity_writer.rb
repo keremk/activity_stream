@@ -3,7 +3,6 @@ $LOAD_PATH << File.expand_path(File.dirname(__FILE__) + '/../../lib')
 require 'dependo'
 require 'redis'
 require 'json'
-require 'models/activity'
 require 'resque'
 
 class ActivityWriter
@@ -17,20 +16,22 @@ class ActivityWriter
 
 	def initialize(activity, friends)
 		@friends = friends || []
-		@activity = Activity.new
-		@activity.from_hash(activity)
-
-		check_key = Dependo::Registry.has_key?(:test2)
+		@activity = activity
 	end
 
 	def save_to_activity_streams
 		# Save to each friends activity stream
 		@friends.each do |friend_id|
-			save_to_activity_stream "news:#{friend_id}", MAX_LENGTH_TIMELINE
+			puts "#{friend_id}"
+			save_to_activity_stream "newsfeed:#{friend_id}", MAX_LENGTH_TIMELINE
 		end
 
 		# Save to user activity stream
-		save_to_activity_stream "timeline:#{@activity.actor.actor_id}"
+		actor = @activity[:actor.to_s]
+		puts "#{actor}"
+		actor_id = actor[:actorId.to_s] if actor.nil?
+		puts "Actor = #{actor_id}"
+		save_to_activity_stream "timeline:#{actor_id}" 
 	end
 
 	def save_to_activity_stream(key, limit=-1)
